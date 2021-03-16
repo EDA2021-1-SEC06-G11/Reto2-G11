@@ -28,6 +28,7 @@
 import config as cf
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
+from DISClib.Algorithms.Sorting import mergesort as mer
 from DISClib.DataStructures import mapentry as me
 from DISClib.Algorithms.Sorting import shellsort as sa
 assert cf
@@ -38,13 +39,87 @@ los mismos.
 """
 
 # Construccion de modelos
+def newCatalog():
+    catalog = {
+        'videos': None,
+        'category': None}
+
+    catalog['videos'] = lt.newList('ARRAY_LIST')
+
+    catalog['category'] = mp.newMap(50,
+                                    maptype='PROBING'
+                                    ,loadfactor=0.5,
+                                    comparefunction=cmpCategoryNames)
+    
+    return catalog
 
 # Funciones para agregar informacion al catalogo
 
+def addVideo(catalog, video):
+    lt.addLast(catalog['videos'], video)
+    entry = mp.get(catalog['category'],video['category_id'])
+    if entry:
+        lt.addLast(entry['value']['videos'], video)
+
+
+
+
+def addCategory(catalog, category):
+    newCategory = newVideoCategory(category['id'],category['name'])
+    mp.put(catalog['category'],category['id'],newCategory)
+    
+def newVideoCategory(id,name):
+    category = {'name': '',
+                'category_id': '',
+                'videos': None,
+                }
+    category['name'] = name
+    category['category_id'] = id
+    category['videos'] = lt.newList('ARRAY_LIST')
+    return category
+
+def addVideoCategory(catalog, category):
+    
+    categoryid = category['id']
+    entry = mp.get(catalog['category'], categoryid)
+    if entry:
+        categoryvideo = mp.get(catalog['category'], me.getValue(entry)['name'])
+        for video in catalog['videos']['elements']:
+            if int(video['category_id'])== int(categoryid):
+                lt.addLast(categoryvideo['value']['videos'], video)
 # Funciones para creacion de datos
 
 # Funciones de consulta
 
+def getVideosByCategory(catalog, category):
+
+    video = mp.get(catalog['category'],category)
+    if video:
+        return me.getValue(category)['videos']
+    return None
+
+
+
 # Funciones utilizadas para comparar elementos dentro de una lista
 
+def cmpCategoryNames(name, category):
+    categoryEntry = me.getKey(category)
+    if (name == categoryEntry):
+        return 0
+    elif (name > categoryEntry):
+        return 1
+    else:
+        return -1
+
+def cmpVideosByLikes(video1,video2):
+    if float(video1['likes']) > float(video2['likes']):
+        return True
+    else:
+        return False
 # Funciones de ordenamiento
+
+def sortVideos(catalog,size):
+    sub_list = lt.subList(catalog['videos'], 0, size)
+    sub_list = sub_list.copy()
+    sorted_list = mer.sort(sub_list, cmpVideosByLikes)
+    return sorted_list

@@ -23,6 +23,7 @@
 import config as cf
 import model
 import csv
+from DISClib.ADT import list as lt
 
 
 """
@@ -31,8 +32,35 @@ El controlador se encarga de mediar entre la vista y el modelo.
 
 # Inicialización del Catálogo de libros
 
+def initCatalog():
+    catalog = model.newCatalog()
+    return catalog
+
 # Funciones para la carga de datos
+def loadData(catalog):
+    loadCategory(catalog)
+    loadVideos(catalog)
+
+
+def loadVideos(catalog):
+    videosfile = cf.data_dir + 'Videos/videos-small.csv'
+    input_file = csv.DictReader(open(videosfile, encoding='utf-8'))
+    for video in input_file:
+        model.addVideo(catalog, video)
+
+def loadCategory(catalog):
+    categoryfile = cf.data_dir +'Videos/category-id.csv'
+    input_file = csv.DictReader(open(categoryfile, encoding='utf-8'),delimiter= '\t')
+    for category in input_file:
+        model.addCategory(catalog,category)
 
 # Funciones de ordenamiento
 
 # Funciones de consulta sobre el catálogo
+
+def getVideosByCategory(catalog, category):
+
+    videos = model.getVideosByCategory(catalog,category)
+    '''size = lt.size(videos)
+    videos = model.sortVideos(videos,int(size))'''
+    return videos
