@@ -42,7 +42,8 @@ los mismos.
 def newCatalog():
     catalog = {
         'videos': None,
-        'category': None}
+        'category': None,
+        'categories': None}
 
     catalog['videos'] = lt.newList('ARRAY_LIST')
 
@@ -50,6 +51,8 @@ def newCatalog():
                                     maptype='PROBING'
                                     ,loadfactor=0.5,
                                     comparefunction=cmpCategoryNames)
+    
+    catalog['categories'] = lt.newList('ARRAY_LIST')
     
     return catalog
 
@@ -61,8 +64,15 @@ def addVideo(catalog, video):
     if entry:
         lt.addLast(entry['value']['videos'], video)
 
+def addCategories(catalog,category):
+    t = newCategoryID(category['name'], category['id'])
+    lt.addLast(catalog['categories'],t)
 
-
+def newCategoryID(name,id):
+    category = {'name':'','id':''}
+    category['name'] = name
+    category['id'] = id
+    return category
 
 def addCategory(catalog, category):
     newCategory = newVideoCategory(category['id'],category['name'])
@@ -78,15 +88,7 @@ def newVideoCategory(id,name):
     category['videos'] = lt.newList('ARRAY_LIST')
     return category
 
-def addVideoCategory(catalog, category):
-    
-    categoryid = category['id']
-    entry = mp.get(catalog['category'], categoryid)
-    if entry:
-        categoryvideo = mp.get(catalog['category'], me.getValue(entry)['name'])
-        for video in catalog['videos']['elements']:
-            if int(video['category_id'])== int(categoryid):
-                lt.addLast(categoryvideo['value']['videos'], video)
+
 # Funciones para creacion de datos
 
 # Funciones de consulta
@@ -95,12 +97,24 @@ def getVideosByCategory(catalog, category):
 
     video = mp.get(catalog['category'],category)
     if video:
-        return me.getValue(category)['videos']
+        return me.getValue(video)['videos']
     return None
 
 
 
 # Funciones utilizadas para comparar elementos dentro de una lista
+
+def cmpVideosCategoryID(catalog, category):
+    size = lt.size(catalog['categories'])
+    i = 0 
+    centinela = False
+    while i <= size and centinela == False:
+        cat = lt.getElement(catalog['categories'],i)
+        if cat['name'].lower() == (' '+category):
+            respuesta = cat['id']
+            centinela = True
+        i += 1
+    return respuesta
 
 def cmpCategoryNames(name, category):
     categoryEntry = me.getKey(category)
@@ -119,7 +133,7 @@ def cmpVideosByLikes(video1,video2):
 # Funciones de ordenamiento
 
 def sortVideos(catalog,size):
-    sub_list = lt.subList(catalog['videos'], 0, size)
+    sub_list = lt.subList(catalog, 0, size)
     sub_list = sub_list.copy()
     sorted_list = mer.sort(sub_list, cmpVideosByLikes)
     return sorted_list

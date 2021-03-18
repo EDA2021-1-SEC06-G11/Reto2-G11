@@ -24,6 +24,8 @@ import config as cf
 import sys
 import controller
 from DISClib.ADT import list as lt
+from DISClib.DataStructures import mapentry as mediar
+from DISClib.ADT import map as mp
 assert cf
 
 
@@ -41,14 +43,18 @@ def printMenu():
 
 def printResults(ord_videos,sample):
     size  = lt.size(ord_videos)
-    if size > sample:
+    lista = []
+    if int(size) > int(sample):
         print('Los primero ', sample, ' videos ordenados son:')
-        i = 0
-        while i < sample:
+        i = 1
+        while i <= int(sample):
             video = lt.getElement(ord_videos, i)
-            print('Titulo: '+ video['title']+' Channel title: '+video['channel_title']+' trending date: '+
-             video['trending_date']+ ' Country'+ video['country']+ ' Views: '+ video['views']+' likes: '+
-              video['likes']+' dislikes: '+ video['dislikes'])
+            if video['title'] not in lista: 
+                print('Titulo: '+ video['title']+' Channel title: '+video['channel_title']+ ' Country'+ video['country']+ ' Views: '+ video['views']+' likes: '+
+                video['likes']+' dislikes: '+ video['dislikes'])
+                lista.append(video['title'])
+            else:
+                sample += 1
             i+=1
 
 catalog = None
@@ -62,16 +68,13 @@ while True:
     if int(inputs[0]) == 1:
         print("Cargando información de los archivos ....")
         catalog = controller.initCatalog()
-        print("Cargando información de los archivos ....")
         controller.loadData(catalog)
-        print(catalog['category'])
 
     elif int(inputs[0]) == 2:
         n = input('Cuantos videos desea listar: ')
         category = input('Digite el nombre de la categoria: ')
         videos = controller.getVideosByCategory(catalog,category)
-        '''printResults(videos,int(n))'''
-        print(videos)
+        printResults(videos,int(n))
 
 
     else:
