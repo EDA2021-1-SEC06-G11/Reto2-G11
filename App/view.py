@@ -68,7 +68,9 @@ while True:
     if int(inputs[0]) == 1:
         print("Cargando información de los archivos ....")
         catalog = controller.initCatalog()
-        controller.loadData(catalog)
+        answer = controller.loadData(catalog)
+        print("Tiempo [ms]: ", f"{answer[0]:.3f}", "  ||  ",
+              "Memoria [kB]: ", f"{answer[1]:.3f}")
 
     elif int(inputs[0]) == 2:
         n = input('Cuantos videos desea listar: ')

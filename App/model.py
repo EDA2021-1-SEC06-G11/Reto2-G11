@@ -48,8 +48,8 @@ def newCatalog():
     catalog['videos'] = lt.newList('ARRAY_LIST')
 
     catalog['category'] = mp.newMap(50,
-                                    maptype='PROBING'
-                                    ,loadfactor=0.5,
+                                    maptype='CHAINING'
+                                    ,loadfactor=6.0,
                                     comparefunction=cmpCategoryNames)
     
     catalog['categories'] = lt.newList('ARRAY_LIST')
