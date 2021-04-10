@@ -42,6 +42,7 @@ los mismos.
 def newCatalog():
     catalog = {
         'videos': None,
+        'country': None,
         'category': None,
         'categories': None}
 
@@ -51,6 +52,10 @@ def newCatalog():
                                     maptype='CHAINING'
                                     ,loadfactor=6.0,
                                     comparefunction=cmpCategoryNames)
+    catalog['country'] = mp.newMap(10,
+                                    maptype='PROBING',
+                                    loadfactor=0.5,
+                                    comparefunction= cmpVideosCountry)
     
     catalog['categories'] = lt.newList('ARRAY_LIST')
     
@@ -63,21 +68,42 @@ def addVideo(catalog, video):
     entry = mp.get(catalog['category'],video['category_id'])
     if entry:
         lt.addLast(entry['value']['videos'], video)
+   
+
+def addCountry(catalog,country, video):
+   
+    countries = catalog['country']
+    existcountry = mp.contains(countries, country)
+    if existcountry:
+        entry = mp.get(countries, country)
+        country1 = me.getValue(entry)
+    else:
+        country1 = newVideoCountry(country)
+        mp.put(countries, country, country1)
+    lt.addLast(country1['videos'],video)
+    
 
 def addCategories(catalog,category):
     t = newCategoryID(category['name'], category['id'])
     lt.addLast(catalog['categories'],t)
 
+def addCategory(catalog, category):
+    newCategory = newVideoCategory(category['id'],category['name'])
+    mp.put(catalog['category'],category['id'],newCategory)
+
+# Funciones para creacion de datos
 def newCategoryID(name,id):
     category = {'name':'','id':''}
     category['name'] = name
     category['id'] = id
     return category
 
-def addCategory(catalog, category):
-    newCategory = newVideoCategory(category['id'],category['name'])
-    mp.put(catalog['category'],category['id'],newCategory)
-    
+def newVideoCountry(pais):
+    country = {'videos': None}
+    country['country'] = pais
+    country['videos'] = lt.newList('ARRAY_LIST')
+    return country
+
 def newVideoCategory(id,name):
     category = {'name': '',
                 'category_id': '',
@@ -87,10 +113,6 @@ def newVideoCategory(id,name):
     category['category_id'] = id
     category['videos'] = lt.newList('ARRAY_LIST')
     return category
-
-
-# Funciones para creacion de datos
-
 # Funciones de consulta
 
 def getVideosByCategory(catalog, category):
@@ -100,9 +122,66 @@ def getVideosByCategory(catalog, category):
         return me.getValue(video)['videos']
     return None
 
+def getVideosByCountry(catalog, country):
+    video = mp.get(catalog['country'],country)
+    if video:
+        return me.getValue(video)['videos']
+    return None
 
+def getVideosByCategoryR1(videos,size, category_id):
+    BestVideos = newCatalog()
+    for pos in range(0, int(lt.size(videos))):
+        element = lt.getElement(videos,pos)
+        if element['category_id'] == category_id:
+            lt.addLast(BestVideos['videos'],element)
+    return BestVideos['videos']
+
+def getNumByID(catalog):
+    bestvideo = None
+    bestreps = 0
+    cmpvideo = None
+    cmpreps = 0
+    pos = 1
+    while pos <= lt.size(catalog):
+        cmpvideo = lt.getElement(catalog, pos)
+        cmpreps = repForID(catalog, cmpvideo['video_id'], pos)
+        if cmpreps > bestreps:
+            bestvideo = lt.getElement(catalog, pos)
+            bestreps = cmpreps
+        pos += cmpreps
+    return (bestvideo,bestreps)
+
+def repForID(catalog, video, firstpos):
+    reps = 0
+    pos = firstpos
+    while pos <= lt.size(catalog):
+        cmpvideo = lt.getElement(catalog, pos)
+        if cmpvideo['video_id'] == video:
+            reps += 1
+        else:
+            break
+        pos += 1
+    return reps
+
+def getVideosByTags(catalog,tag,size):
+    BestVideos = newCatalog()
+    for pos in range(0, int(lt.size(catalog))):
+        element = lt.getElement(catalog, pos)
+        if cmpVideosTags(catalog,element,tag) == True:
+            lt.addLast(BestVideos['videos'],element)
+    return BestVideos['videos']
 
 # Funciones utilizadas para comparar elementos dentro de una lista
+def cmpVideosTags(catalog,element, tag):
+    respuesta = False
+    taglist = element['tags'].split('|')
+    i = 0
+    while i < len(taglist) and respuesta == False:
+        t = taglist[i].find(tag)
+        if t != (-1):
+            respuesta = True
+        i += 1
+    return respuesta
 
 def cmpVideosCategoryID(catalog, category):
     size = lt.size(catalog['categories'])
@@ -125,15 +204,50 @@ def cmpCategoryNames(name, category):
     else:
         return -1
 
+def cmpVideosCountry(name, country):
+    countryEntry = me.getKey(country)
+    if name == countryEntry:
+        return 0
+    elif name > countryEntry:
+        return 1
+    else:
+        return -1
+
 def cmpVideosByLikes(video1,video2):
     if float(video1['likes']) > float(video2['likes']):
         return True
     else:
         return False
+
+def cmpVideosByViews(video1,video2):
+    if float(video1['views']) > float(video2['views']):
+        return True
+    else:
+        return False
+
+def cmpVideosByID(video1,video2):
+    if (video1['video_id']) < (video2['video_id']):
+        return True
+    else:
+        return False
+
+
 # Funciones de ordenamiento
 
 def sortVideos(catalog,size):
     sub_list = lt.subList(catalog, 0, size)
     sub_list = sub_list.copy()
     sorted_list = mer.sort(sub_list, cmpVideosByLikes)
+    return sorted_list
+
+def sortVideosByViews(catalog,size):
+    sub_list = lt.subList(catalog, 0, size)
+    sub_list = sub_list.copy()
+    sorted_list = mer.sort(sub_list, cmpVideosByViews)
+    return sorted_list
+
+def sortVideosByID(catalog,size):
+    sub_list = lt.subList(catalog, 0, size)
+    sub_list = sub_list.copy()
+    sorted_list = mer.sort(sub_list, cmpVideosByID)
     return sorted_list

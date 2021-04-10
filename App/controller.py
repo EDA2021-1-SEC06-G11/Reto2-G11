@@ -48,7 +48,6 @@ def loadData(catalog):
     start_memory = getMemory()
 
     loadCategories(catalog)
-    loadCategory(catalog)
     loadVideos(catalog)
 
     stop_memory = getMemory()
@@ -65,19 +64,16 @@ def loadVideos(catalog):
     videosfile = cf.data_dir + 'Videos/videos-large.csv'
     input_file = csv.DictReader(open(videosfile, encoding='utf-8'))
     for video in input_file:
+        model.addCountry(catalog,video['country'],video)
         model.addVideo(catalog, video)
 
-def loadCategory(catalog):
-    categoryfile = cf.data_dir +'Videos/category-id.csv'
-    input_file = csv.DictReader(open(categoryfile, encoding='utf-8'),delimiter= '\t')
-    for category in input_file:
-        model.addCategory(catalog,category)
 
 def loadCategories(catalog):
     categoryfile = cf.data_dir + 'Videos/category-id.csv'
     input_file = csv.DictReader(open(categoryfile, encoding='utf-8'),delimiter= '\t')
     for category in input_file:
         model.addCategories(catalog,category)
+        model.addCategory(catalog,category)
 
 # Funciones de ordenamiento
 
@@ -108,3 +104,35 @@ def getVideosByCategory(catalog, category):
     size = lt.size(videos)
     videos = model.sortVideos(videos,int(size))
     return videos
+
+def getVideosByCategoryAndCountry(catalog, category, country):
+    category_id = model.cmpVideosCategoryID(catalog, category)
+    videos = model.getVideosByCountry(catalog, country)
+    size = lt.size(videos)
+    videos = model.getVideosByCategoryR1(videos, int(size),category_id)
+    size2 = lt.size(videos)
+    videos_sorted = model.sortVideosByViews(videos,int(size2))
+    return videos_sorted
+
+def getVideoByTrendingAndCountry(catalog,country):
+    videos = model.getVideosByCountry(catalog,country)
+    size = lt.size(videos)
+    videos = model.sortVideosByID(videos,size)
+    video = model.getNumByID(videos)
+    return video
+
+def getVideoByTrendingAndCategory(catalog,category):
+    category_id = model.cmpVideosCategoryID(catalog,category)
+    videos = model.getVideosByCategory(catalog,category_id)
+    size = lt.size(videos)
+    videos = model.sortVideosByID(videos,size)
+    video = model.getNumByID(videos)
+    return video
+
+def getVideosByCountryAndTags(catalog,country, tag):
+    videos = model.getVideosByCountry(catalog,country)
+    size = lt.size(videos)
+    videos = model.getVideosByTags(videos,tag, size)
+    size = lt.size(videos)
+    videos_sorted = model.sortVideos(videos,int(size))
+    return videos_sorted

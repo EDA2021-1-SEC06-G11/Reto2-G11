@@ -38,8 +38,12 @@ operación solicitada
 
 def printMenu():
     print("Bienvenido")
-    print("1- Cargar información en el catálogo")
-    print("2- los n videos con más LIKES para el nombre de una categoría específica")
+    print('9- Cargar informacion en el catalogo')
+    print("1- Encontrar buenos videos por categoría y país")
+    print("2- Encontrar video tendencia por país")
+    print("3- Encontrar video tendencia por categoría")
+    print("4- Buscar los videos con más likes")
+    print("0- Salir")
 
 def printResults(ord_videos,sample):
     size  = lt.size(ord_videos)
@@ -56,8 +60,44 @@ def printResults(ord_videos,sample):
             else:
                 sample += 1
             i+=1
+def printResults1(ord_videos,sample):
+    size  = lt.size(ord_videos)
+    if size > sample:
+        print('Los primero ', sample, ' videos ordenados son:')
+        i = 1
+        while i < (sample+1):
+            video = lt.getElement(ord_videos, i)
+            print('Titulo: '+ video['title']+' Channel title: '+video['channel_title']+' trending date: '+
+             video['trending_date']+ ' Country'+ video['country']+ ' Views: '+ video['views']+' likes: '+
+              video['likes']+' dislikes: '+ video['dislikes'])
+            i+=1
 
+def printResults2(video):
+    print('El video que tuvo más trending dates fue: ')
+    print('Titulo: '+ video[0]['title']+' Channel title: '+ video[0]['channel_title']+' Country: '+video[0]['country']+' Days: '+str(video[1]))
+
+def printResults3(video):
+    print('El video que tuvo más trending dates fue: ')
+    print('Titulo: '+ video[0]['title']+' Channel Title: '+video[0]['channel_title']+' Category: '+ video[0]['category_id'] + ' Dias: '+ str(video[1]) )
+
+def printResults4(list_sorted,sample):
+    size  = lt.size(list_sorted)
+    lista = []
+    if int(size) > sample:
+        print('Los primero ', sample, ' videos ordenados son:')
+        i = 1
+        while i <= sample:
+            video = lt.getElement(list_sorted, i)
+            if video['title'] not in lista:
+                print('Titulo: '+ video['title']+' Channel title: '+video['channel_title']+' trending date: '+
+                video['trending_date']+ ' Publish time'+ video['publish_time']+ ' Views: '+ video['views']+' likes: '+
+                video['likes']+' dislikes: '+ video['dislikes'] + 'tags: '+video['tags'] +  'pais: '+video['country'])
+                lista.append(video['title'])
+            else:
+                sample+=1
+            i += 1
 catalog = None
+
 
 """
 Menu principal
@@ -65,18 +105,42 @@ Menu principal
 while True:
     printMenu()
     inputs = input('Seleccione una opción para continuar\n')
-    if int(inputs[0]) == 1:
+    if int(inputs[0]) == 9:
         print("Cargando información de los archivos ....")
         catalog = controller.initCatalog()
         answer = controller.loadData(catalog)
         print("Tiempo [ms]: ", f"{answer[0]:.3f}", "  ||  ",
               "Memoria [kB]: ", f"{answer[1]:.3f}")
 
-    elif int(inputs[0]) == 2:
+    elif int(inputs[0]) == 8:
         n = input('Cuantos videos desea listar: ')
         category = input('Digite el nombre de la categoria: ')
         videos = controller.getVideosByCategory(catalog,category)
         printResults(videos,int(n))
+
+    elif int(inputs[0]) == 1:
+        n = input('Cuantos videos desea listar: ')
+        category = input('Digite el nombre de la categoria: ')
+        country = input('Digite el pais que desea listar: ')
+        videos = controller.getVideosByCategoryAndCountry(catalog,category,country)
+        printResults1(videos,int(n))
+    
+    elif int(inputs[0]) == 2:
+        country = input('Digite el pais del video que busca: ')
+        video = controller.getVideoByTrendingAndCountry(catalog,country)
+        printResults2(video)
+
+    elif int(inputs[0]) == 3:
+        category = input('Digite la categoria del video que busca: ')
+        video = controller.getVideoByTrendingAndCategory(catalog,category)
+        printResults3(video)
+    
+    elif int(inputs[0]) == 4:
+        n = input('Indique numero de videos para listar: ')
+        country = input('Indique el pais: ')
+        tag = input('Indique el tag: ')
+        videos = controller.getVideosByCountryAndTags(catalog,country,tag)
+        printResults4(videos,int(n))
 
 
     else:
