@@ -107,7 +107,9 @@ while True:
     inputs = input('Seleccione una opción para continuar\n')
     if int(inputs[0]) == 9:
         print("Cargando información de los archivos ....")
-        catalog = controller.initCatalog()
+        mptype = input('Por favor indique el maptype: ')
+        ldfactor = input('Por favor indique el loadfactor: ')
+        catalog = controller.initCatalog(mptype,float(ldfactor))
         answer = controller.loadData(catalog)
         print("Tiempo [ms]: ", f"{answer[0]:.3f}", "  ||  ",
               "Memoria [kB]: ", f"{answer[1]:.3f}")
