@@ -21,6 +21,8 @@
  """
 
 import config as cf
+import time
+import tracemalloc
 import sys
 import controller
 from DISClib.ADT import list as lt
@@ -107,9 +109,7 @@ while True:
     inputs = input('Seleccione una opción para continuar\n')
     if int(inputs[0]) == 9:
         print("Cargando información de los archivos ....")
-        mptype = input('Por favor indique el maptype: ')
-        ldfactor = input('Por favor indique el loadfactor: ')
-        catalog = controller.initCatalog(mptype,float(ldfactor))
+        catalog = controller.initCatalog()
         answer = controller.loadData(catalog)
         print("Tiempo [ms]: ", f"{answer[0]:.3f}", "  ||  ",
               "Memoria [kB]: ", f"{answer[1]:.3f}")
@@ -125,24 +125,33 @@ while True:
         category = input('Digite el nombre de la categoria: ')
         country = input('Digite el pais que desea listar: ')
         videos = controller.getVideosByCategoryAndCountry(catalog,category,country)
-        printResults1(videos,int(n))
+        printResults1(videos[0],int(n))
+        print("Tiempo [ms]: ", f"{videos[1][0]:.3f}", "  ||  ",
+              "Memoria [kB]: ", f"{videos[1][1]:.3f}")
     
     elif int(inputs[0]) == 2:
         country = input('Digite el pais del video que busca: ')
         video = controller.getVideoByTrendingAndCountry(catalog,country)
-        printResults2(video)
+        printResults2(video[0])
+        print("Tiempo [ms]: ", f"{video[1][0]:.3f}", "  ||  ",
+              "Memoria [kB]: ", f"{video[1][1]:.3f}")
 
     elif int(inputs[0]) == 3:
         category = input('Digite la categoria del video que busca: ')
         video = controller.getVideoByTrendingAndCategory(catalog,category)
-        printResults3(video)
+        printResults3(video[0])
+        print("Tiempo [ms]: ", f"{video[1][0]:.3f}", "  ||  ",
+              "Memoria [kB]: ", f"{video[1][1]:.3f}")
     
     elif int(inputs[0]) == 4:
         n = input('Indique numero de videos para listar: ')
         country = input('Indique el pais: ')
         tag = input('Indique el tag: ')
         videos = controller.getVideosByCountryAndTags(catalog,country,tag)
-        printResults4(videos,int(n))
+        printResults4(videos[0],int(n))
+        print("Tiempo [ms]: ", f"{videos[1][0]:.3f}", "  ||  ",
+              "Memoria [kB]: ", f"{videos[1][1]:.3f}")
+    
 
 
     else:

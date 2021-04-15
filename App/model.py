@@ -39,7 +39,7 @@ los mismos.
 """
 
 # Construccion de modelos
-def newCatalog(mptype,ldfactor):
+def newCatalog():
     catalog = {
         'videos': None,
         'country': None,
@@ -49,8 +49,8 @@ def newCatalog(mptype,ldfactor):
     catalog['videos'] = lt.newList('ARRAY_LIST')
 
     catalog['category'] = mp.newMap(50,
-                                    maptype=mptype
-                                    ,loadfactor=ldfactor,
+                                    maptype='PROBING',
+                                    loadfactor=0.5,
                                     comparefunction=cmpCategoryNames)
     catalog['country'] = mp.newMap(10,
                                     maptype='PROBING',

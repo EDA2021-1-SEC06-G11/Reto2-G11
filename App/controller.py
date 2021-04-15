@@ -34,8 +34,8 @@ El controlador se encarga de mediar entre la vista y el modelo.
 
 # Inicialización del Catálogo de libros
 
-def initCatalog(mptype,ldfactor):
-    catalog = model.newCatalog(mptype,ldfactor)
+def initCatalog():
+    catalog = model.newCatalog()
     return catalog
 
 # Funciones para la carga de datos
@@ -99,40 +99,117 @@ def deltaMemory(start_memory, stop_memory):
 # Funciones de consulta sobre el catálogo
 
 def getVideosByCategory(catalog, category):
+    delta_time = -1.0
+    delta_memory = -1.0
+
+    tracemalloc.start()
+    start_time = getTime()
+    start_memory = getMemory()
+
     category_id = model.cmpVideosCategoryID(catalog,category)
     videos = model.getVideosByCategory(catalog,category_id)
     size = lt.size(videos)
     videos = model.sortVideos(videos,int(size))
-    return videos
+
+    stop_memory = getMemory()
+    stop_time = getTime()
+    tracemalloc.stop()
+
+    delta_time = stop_time - start_time
+    delta_memory = deltaMemory(start_memory, stop_memory)
+    delta = delta_time,delta_memory
+
+    return videos,delta
 
 def getVideosByCategoryAndCountry(catalog, category, country):
+    delta_time = -1.0
+    delta_memory = -1.0
+
+    tracemalloc.start()
+    start_time = getTime()
+    start_memory = getMemory()
+
     category_id = model.cmpVideosCategoryID(catalog, category)
     videos = model.getVideosByCountry(catalog, country)
     size = lt.size(videos)
     videos = model.getVideosByCategoryR1(videos, int(size),category_id)
     size2 = lt.size(videos)
     videos_sorted = model.sortVideosByViews(videos,int(size2))
-    return videos_sorted
+
+    stop_memory = getMemory()
+    stop_time = getTime()
+    tracemalloc.stop()
+
+    delta_time = stop_time - start_time
+    delta_memory = deltaMemory(start_memory, stop_memory)
+    delta = delta_time,delta_memory
+    return videos_sorted,delta
 
 def getVideoByTrendingAndCountry(catalog,country):
+    delta_time = -1.0
+    delta_memory = -1.0
+
+    tracemalloc.start()
+    start_time = getTime()
+    start_memory = getMemory()
+
     videos = model.getVideosByCountry(catalog,country)
     size = lt.size(videos)
     videos = model.sortVideosByID(videos,size)
     video = model.getNumByID(videos)
-    return video
+
+    stop_memory = getMemory()
+    stop_time = getTime()
+    tracemalloc.stop()
+
+    delta_time = stop_time - start_time
+    delta_memory = deltaMemory(start_memory, stop_memory)
+    delta = delta_time,delta_memory
+    return video,delta
 
 def getVideoByTrendingAndCategory(catalog,category):
+    delta_time = -1.0
+    delta_memory = -1.0
+
+    tracemalloc.start()
+    start_time = getTime()
+    start_memory = getMemory()
+
     category_id = model.cmpVideosCategoryID(catalog,category)
     videos = model.getVideosByCategory(catalog,category_id)
     size = lt.size(videos)
     videos = model.sortVideosByID(videos,size)
     video = model.getNumByID(videos)
-    return video
+
+    stop_memory = getMemory()
+    stop_time = getTime()
+    tracemalloc.stop()
+
+    delta_time = stop_time - start_time
+    delta_memory = deltaMemory(start_memory, stop_memory)
+    delta = delta_time,delta_memory
+
+    return video,delta
 
 def getVideosByCountryAndTags(catalog,country, tag):
+    delta_time = -1.0
+    delta_memory = -1.0
+
+    tracemalloc.start()
+    start_time = getTime()
+    start_memory = getMemory()
+
     videos = model.getVideosByCountry(catalog,country)
     size = lt.size(videos)
     videos = model.getVideosByTags(videos,tag, size)
     size = lt.size(videos)
     videos_sorted = model.sortVideos(videos,int(size))
-    return videos_sorted
+
+    stop_memory = getMemory()
+    stop_time = getTime()
+    tracemalloc.stop()
+
+    delta_time = stop_time - start_time
+    delta_memory = deltaMemory(start_memory, stop_memory)
+    delta = delta_time,delta_memory
+    return videos_sorted,delta
